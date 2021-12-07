@@ -4,6 +4,7 @@ import secrets from "./secrets/admin_secret.js";
 import users from "./model/users.js";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
+import cors from "cors";
 
 try {
   mongoose.connect(secrets.mongodb_url, {
@@ -16,13 +17,13 @@ try {
 }
 
 const app = express();
+app.use(cors({ origin: "https://sabirauthbackend.herokuapp.com/" }));
 app.use(express.json());
 
 app.get("/userprofile", authToken, async (req, res) => {
   // parameters needed ..... Auth token
-  const user_details = await users
-    .findOne({email:req.body.email});
-    console.log(user_details)
+  const user_details = await users.findOne({ email: req.body.email });
+  console.log(user_details);
   res.status(200).json(user_details);
 });
 
@@ -66,8 +67,11 @@ app.post("/api/login", async (req, res) => {
   if (!userData) {
     return res.status(403).json({ message: "User does not exists!" });
   }
-  
-  if (userData.email === email && await bcrypt.compare(password, userData.password) ) {
+
+  if (
+    userData.email === email &&
+    (await bcrypt.compare(password, userData.password))
+  ) {
     const tempUser = { email: email, firstName: userData.firstName };
     const accessToken = jwt.sign(tempUser, secrets.jwt_secret);
     return res.status(200).json({ accessToken, tempUser });
