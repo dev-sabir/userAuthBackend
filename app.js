@@ -17,7 +17,7 @@ try {
 }
 
 const app = express();
-app.use(cors({ origin: "http://sabirauthbackend.herokuapp.com/" }));
+app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
 
 app.get("/userprofile", authToken, async (req, res) => {
